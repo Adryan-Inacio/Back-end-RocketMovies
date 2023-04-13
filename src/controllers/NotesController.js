@@ -4,35 +4,24 @@ const AppError = require('../utils/AppError')
 
 const dayjs = require('dayjs')
 
+const NoteRepository = require('../repositories/NoteRepository')
+const NoteCreateService = require('../services/NoteCreateService')
+
 class NotesController {
   async create(request, response) {
     const { title, description, rating, tags } = request.body
     const user_id = request.user.id
 
-    const now = dayjs().format('DD.MM.YYYY HH:mm:ss')
+    const noteRepository = new NoteRepository()
+    const noteCreateService = new NoteCreateService(noteRepository)
 
-    if (rating < 1 || rating > 5) {
-      throw new AppError('Insira uma nota entre 1 e 5')
-    }
-
-    const note_id = await knex('Movie_notes').insert({
+    await noteCreateService.execute({
       title,
       description,
       rating,
-      user_id,
-      created_at: now,
-      updated_at: now
+      tags,
+      user_id
     })
-
-    const tagsInsert = tags.map(name => {
-      return {
-        note_id,
-        user_id,
-        name
-      }
-    })
-
-    await knex('Movie_tags').insert(tagsInsert)
 
     return response.json()
   }

@@ -5,29 +5,17 @@ const sqliteConnection = require('../database/sqlite')
 
 const dayjs = require('dayjs')
 
+const UserRepository = require('../repositories/UserRepository')
+const UserCreateService = require('../services/UserCreateService')
+
 class UsersController {
   async create(request, response) {
     const { name, email, password } = request.body
 
-    const database = await sqliteConnection()
+    const userRepository = new UserRepository()
+    const userCreateService = new UserCreateService(userRepository)
 
-    const userExists = await database.get(
-      'SELECT * FROM users WHERE email = (?)',
-      [email]
-    )
-
-    const now = dayjs().format('DD.MM.YYYY HH:mm:ss')
-
-    if (userExists) {
-      throw new AppError('Este e-mail já está em uso.')
-    }
-
-    const hashedPassword = await hash(password, 8)
-
-    await database.run(
-      'INSERT INTO users (name, email, password, created_at, updated_at) VALUES (?, ?, ?, ?, ?)',
-      [name, email, hashedPassword, now, now]
-    )
+    await userCreateService.execute({ name, email, password })
 
     return response.status(201).json()
   }

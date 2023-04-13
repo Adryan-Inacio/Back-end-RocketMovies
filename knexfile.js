@@ -16,14 +16,8 @@ module.exports = {
         'database',
         'knex',
         'migrations'
-      ),
-      useNullAsDefault: true
-    }
+      )
+    },
+    useNullAsDefault: true
   }
 }
-
-/*
-
-afterCreate: (conn, cb) => conn.run('PRAGMA foreign_keys = ON', cb)
-
-*/
